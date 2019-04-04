@@ -141,24 +141,41 @@ TEAMS = [
     'Sociedade Esportiva Palmeiras'
 ]
 
+# Mix of imagination and reality
+LEAGUES = [
+    'Premier League',
+    'Other League',
+    'Brasileirão'
+]
+
 # Invented by me
 MATCHES = [
     {
         'home': 'Chelsea F.C',
         'away': 'Manchester United F.C',
         'score': [0, 0],
-        'date': datetime.utcnow()
+        'date': datetime.utcnow(),
+        'league': 'Premier League'
     },
     {
         'home': 'Manchester United F.C',
         'away': 'Grêmio Foot-Ball Porto Alegrense',
         'score': [2, 1],
-        'date': datetime.utcnow()
-    }
+        'date': datetime.utcnow(),
+        'league': 'Other League'
+    },
+    {
+        'home': 'Sociedade Esportiva Palmeiras',
+        'away': 'Chelsea F.C',
+        'score': [1, 4],
+        'date': datetime.utcnow(),
+        'league': 'Other League'
+    },
     {
         'home': 'Grêmio Foot-Ball Porto Alegrense',
         'away': 'Sociedade Esportiva Palmeiras',
         'score': [3, 2],
-        'date': datetime.utcnow()
+        'date': datetime.utcnow(),
+        'league': 'Brasileirão'
     }
 ]
