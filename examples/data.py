@@ -10,7 +10,7 @@ matches = [
     {
         'date': datetime.today(),
         'home': 'Gremio FBPA',
-        'away': 'Internacional FC'
+        'away': 'Palmeiras'
     }
 
 ]
