@@ -11,6 +11,14 @@ class Team(pw.Model):
         database = db
 
 
+class Player(pw.Model):
+    name = pw.CharField()
+
+    class Meta:
+        database = db
+
+
+
 class Match(pw.Model):
     date = pw.DateField()
     home = pw.ForeignKeyField(Team)
