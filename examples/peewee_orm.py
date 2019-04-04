@@ -2,56 +2,101 @@ import peewee as pw
 
 
 db = pw.SqliteDatabase(':memory:')
+# db = pw.PostgresqlDatabase('filename', user='user')
+# db = pw.MySQLDatabase('filename')
 
 
-class Team(pw.Model):
-    name = pw.CharField()
-
+class BaseModel(pw.Model):
     class Meta:
         database = db
 
 
-class Player(pw.Model):
-    name = pw.CharField()
-
-    class Meta:
-        database = db
+class Team(BaseModel):
+    id = pw.AutoField()
+    name = pw.TextField()
 
 
+class Player(BaseModel):
+    id = pw.AutoField()
+    name = pw.TextField()
+    team = pw.ForeignKeyField(Team, backref='players')
 
-class Match(pw.Model):
-    date = pw.DateField()
-    home = pw.ForeignKeyField(Team)
-    away = pw.ForeignKeyField(Team)
 
-    class Meta:
-        database = db
+class Match(BaseModel):
+    id = pw.AutoField()
+    date = pw.DateTimeField()
+    home = pw.ForeignKeyField(Team, backref='matches')
+    away = pw.ForeignKeyField(Team, backref='matches')
+    home_score = pw.IntegerField()
+    away_score = pw.IntegerField()
+    league = pw.DeferredForeignKey('League', backref='matches')
+
+
+class League(BaseModel):
+    id = pw.AutoField()
+    name = pw.TextField()
+
 
 
 db.connect()
-db.create_tables([Team, Match])
+db.create_tables([Team, Player, Match, League])
 
 
-from data import matches
+import data
 
-for match in matches:
-    home = Team(name=match['home'])
-    away = Team(name=match['away'])
-    match = Match(date=match['date'], home=home, away=away)
+# Insert teams
+for team in data.TEAMS:
+    team = Team(name=team)
+    team.save()
 
-    # Save it
-    home.save()
-    away.save()
+# Get teams
+for team in Team.select():
+    print(team.id, team.name)
+
+
+# Insert players
+for team, players in data.SQUADS.items():
+    team = Team.get(name=team)
+    for player in players:
+        player = Player(name=player, team=team)
+        player.save()
+
+# Get players by team
+for team in Team.select():
+    print(team.name)
+    for player in team.players:
+        print('\t', player.id, player.name)
+
+
+# Insert leagues
+for league in data.LEAGUES:
+    league = League(name=league)
+    league.save()
+
+# Get leagues
+for league in League.select():
+    print(league.id, league.name)
+
+
+# Insert matches
+for match in data.MATCHES:
+    home = Team.get(name=match['home'])
+    away = Team.get(name=match['away'])
+    h, a = match['score']
+    date = match['date']
+    league = League.get(name=match['league'])
+    match = Match(
+        date=date,
+        home=home,
+        away=away,
+        home_score=h,
+        away_score=a,
+        league=league)
     match.save()
 
-
-# Get single match
-team = Team.get(Team.name == 'Gremio FBPA')
-match = Match.get(Match.home == team)
-print(match)  # 2
-
-
-# Get all matches
-matches = Match.select()
-print(list(matches))  #  [<Match: 1>, <Match: 2>]
-
+# Get matches by league
+for league in League.select():
+    print(league.name)
+    for match in league.matches:
+        score = '%d x %d' % (match.home_score, match.away_score)
+        print('\t', match.id, match.home.name, score, match.away.name)
