@@ -1,3 +1,4 @@
+from itertools import chain
 from datetime import datetime
 
 from pony import orm
@@ -12,8 +13,11 @@ class Team(db.Entity):
     home = orm.Set('Match')
     away = orm.Set('Match')
 
+    @property
     def matches(self):
-        return self.home + self.away
+        home = (h for h in self.home)
+        away = (h for h in self.away)
+        return chain(home, away)
 
 
 class Player(db.Entity):
@@ -105,5 +109,13 @@ with orm.db_session:
     for league in League.select():
         print(league.name)
         for match in league.matches:
+            score = '%d x %d' % (match.home_score, match.away_score)
+            print('\t', match.id, match.home.name, score, match.away.name)
+
+# Get matches by team
+with orm.db_session:
+    for team in Team.select():
+        print(team.name)
+        for match in team.matches:
             score = '%d x %d' % (match.home_score, match.away_score)
             print('\t', match.id, match.home.name, score, match.away.name)

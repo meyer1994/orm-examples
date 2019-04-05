@@ -1,3 +1,5 @@
+from itertools import chain
+
 import peewee as pw
 
 
@@ -15,6 +17,12 @@ class Team(BaseModel):
     id = pw.AutoField()
     name = pw.TextField()
 
+    @property
+    def matches(self):
+        home = (h for h in self.home)
+        away = (h for h in self.away)
+        return chain(home, away)
+
 
 class Player(BaseModel):
     id = pw.AutoField()
@@ -25,8 +33,8 @@ class Player(BaseModel):
 class Match(BaseModel):
     id = pw.AutoField()
     date = pw.DateTimeField()
-    home = pw.ForeignKeyField(Team, backref='matches')
-    away = pw.ForeignKeyField(Team, backref='matches')
+    home = pw.ForeignKeyField(Team, backref='home')
+    away = pw.ForeignKeyField(Team, backref='away')
     home_score = pw.IntegerField()
     away_score = pw.IntegerField()
     league = pw.DeferredForeignKey('League', backref='matches')
@@ -98,5 +106,12 @@ for match in data.MATCHES:
 for league in League.select():
     print(league.name)
     for match in league.matches:
+        score = '%d x %d' % (match.home_score, match.away_score)
+        print('\t', match.id, match.home.name, score, match.away.name)
+
+# Get matches by team
+for team in Team.select():
+    print(team.name)
+    for match in team.matches:
         score = '%d x %d' % (match.home_score, match.away_score)
         print('\t', match.id, match.home.name, score, match.away.name)

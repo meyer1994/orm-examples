@@ -38,8 +38,8 @@ class Match(Base):
 
     home_id = Column(Integer, ForeignKey('team.id'), nullable=False)
     away_id = Column(Integer, ForeignKey('team.id'), nullable=False)
-    home = relationship('Team', foreign_keys=[home_id], backref='home')
-    away = relationship('Team', foreign_keys=[away_id], backref='away')
+    home = relationship('Team', foreign_keys=[home_id])
+    away = relationship('Team', foreign_keys=[away_id])
 
     home_score = Column(Integer, nullable=False)
     away_score = Column(Integer, nullable=False)
@@ -118,5 +118,12 @@ session.commit()
 for league in session.query(League).all():
     print(league.name)
     for match in league.matches:
+        score = '%d x %d' % (match.home_score, match.away_score)
+        print('\t', match.id, match.home.name, score, match.away.name)
+
+# Get matches by league
+for team in session.query(Team).all():
+    print(team.name)
+    for match in team.matches:
         score = '%d x %d' % (match.home_score, match.away_score)
         print('\t', match.id, match.home.name, score, match.away.name)
